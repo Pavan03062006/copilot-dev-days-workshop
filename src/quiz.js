@@ -34,13 +34,45 @@ function calculatePercentage(score, total) {
  * A = 90% or more, B = 75% or more, C = 50% or more.
  */
 function getGrade(percentage) {
-  if (percentage > 90) return "A";
+  if (percentage >= 90) return "A";
   if (percentage > 75) return "B";
   if (percentage > 50) return "C";
   return "Keep practicing";
 }
 
+function formatTimeLeft(seconds) {
+  return `⏱ ${Math.max(0, seconds)}s`;
+}
+
+function createQuiz(questions) {
+  return { questions: [...questions], current: 0, score: 0 };
+}
+
+function answerQuestion(state, selectedIndex) {
+  const question = state.questions[state.current];
+  const correct = question !== undefined && isCorrect(question, selectedIndex);
+  const nextState = {
+    ...state,
+    current: state.current + 1,
+    score: state.score + (correct ? 1 : 0),
+  };
+  return { state: nextState, correct };
+}
+
+function isQuizFinished(state) {
+  return state.current >= state.questions.length;
+}
+
 // Lets Node.js tests load this file. Browsers ignore this block.
 if (typeof module !== "undefined" && module.exports) {
-  module.exports = { shuffle, isCorrect, calculatePercentage, getGrade };
+  module.exports = {
+    shuffle,
+    isCorrect,
+    calculatePercentage,
+    getGrade,
+    formatTimeLeft,
+    createQuiz,
+    answerQuestion,
+    isQuizFinished,
+  };
 }
