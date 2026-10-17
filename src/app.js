@@ -2,6 +2,7 @@
 
 let state = { questions: [], current: 0, score: 0 };
 const QUESTION_TIME_LIMIT = 15;
+const BEST_SCORE_KEY = "dev-days-quiz-best-score";
 let timerId = null;
 let timeLeft = QUESTION_TIME_LIMIT;
 
@@ -16,6 +17,33 @@ const feedbackText = document.getElementById("feedback");
 const nextButton = document.getElementById("next-btn");
 const scoreText = document.getElementById("score-text");
 const gradeText = document.getElementById("grade-text");
+const bestScoreStart = document.getElementById("best-score-start");
+const bestScoreResult = document.getElementById("best-score-result");
+
+function readBestScore() {
+  try {
+    const savedScore = localStorage.getItem(BEST_SCORE_KEY);
+    if (savedScore === null) return null;
+    const score = Number(savedScore);
+    return Number.isFinite(score) ? score : null;
+  } catch {
+    return null;
+  }
+}
+
+function writeBestScore(score) {
+  try {
+    localStorage.setItem(BEST_SCORE_KEY, String(score));
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function renderStartBestScore() {
+  const best = readBestScore();
+  bestScoreStart.textContent = best === null ? "" : `Best score: ${best}%`;
+}
 
 function showScreen(screenToShow) {
   [startScreen, quizScreen, resultScreen].forEach((screen) => {
@@ -112,6 +140,17 @@ function showResults() {
   const percentage = calculatePercentage(state.score, total);
   scoreText.textContent = `You scored ${state.score} out of ${total} (${percentage}%)`;
   gradeText.textContent = `Grade: ${getGrade(percentage)}`;
+  const previousBest = readBestScore();
+  const newBest = isNewBestScore(percentage, previousBest);
+  if (newBest) writeBestScore(percentage);
+  const best = newBest ? percentage : previousBest;
+  bestScoreResult.textContent =
+    best === null
+      ? "Best score is unavailable."
+      : newBest
+        ? `New best score! ${best}%`
+        : `Best score: ${best}%`;
+  renderStartBestScore();
   showScreen(resultScreen);
 }
 
@@ -125,3 +164,4 @@ function clearTimer() {
 document.getElementById("start-btn").addEventListener("click", startQuiz);
 document.getElementById("restart-btn").addEventListener("click", startQuiz);
 nextButton.addEventListener("click", nextQuestion);
+renderStartBestScore();
