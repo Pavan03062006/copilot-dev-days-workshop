@@ -6,6 +6,7 @@ const {
   shuffle,
   isCorrect,
   calculatePercentage,
+  isNewBestScore,
   getGrade,
   formatTimeLeft,
   createQuiz,
@@ -27,6 +28,19 @@ test("calculatePercentage rounds to a whole number", () => {
 
 test("calculatePercentage returns 0 when there are no questions", () => {
   assert.equal(calculatePercentage(0, 0), 0);
+});
+
+test("isNewBestScore recognizes a higher score", () => {
+  assert.equal(isNewBestScore(90, 80), true);
+});
+
+test("isNewBestScore treats no saved score as a new best", () => {
+  assert.equal(isNewBestScore(0, null), true);
+});
+
+test("isNewBestScore rejects equal or lower scores", () => {
+  assert.equal(isNewBestScore(80, 80), false);
+  assert.equal(isNewBestScore(70, 80), false);
 });
 
 test("shuffle keeps every item and does not change the original array", () => {
